@@ -94,25 +94,22 @@ def chat(prompt):
   return reply
 
 @tree.command(name="image", description="Use AndrewBot's AI to generate images!")
-async def image_command(interaction, prompt: str):
-    openai.api_key = os.environ["AI"]
-    await interaction.response.defer()
-    response = openai.Image.create(
-      model="dall-e-3",
-      prompt=prompt,
-      n=1,
-      size="1024x1024",
-    )
-    url = (response["data"][0]["url"])
-    embed = discord.Embed()
-    embed.set_image(url=url)
-    await interaction.followup.send(f"Your image:\n\n", embed=embed)
-
-@tree.command(name="tokens", description="Find out how many tokens you have used!")
-async def tokens_command(interaction):
-  global tokens
-  await interaction.response.defer()
-  await interaction.followup.send(f"AndrewBot: Number of tokens used: {tokensUsed} (${math.floor(tokensUsed / 2000 * 2) / 100})")
+async def image_command(interaction: discord.Interaction, prompt: str):
+    try:
+        await interaction.response.defer()
+        openai.api_key = os.environ["AI"]
+        response = openai.Image.create(
+            model="dall-e-3",
+            prompt=prompt,
+            n=1,
+            size="1024x1024",
+        )
+        url = response["data"][0]["url"]
+        embed = discord.Embed()
+        embed.set_image(url=url)
+        await interaction.followup.send(f"Your image:\n\n", embed=embed)
+    except Exception as e:
+        await interaction.followup.send(f"An error occurred: {e}")
 
 @tree.command(name="credits", description="Find out who/what helped me with the bot")
 async def credits_command(interaction):
@@ -139,7 +136,6 @@ To use AndrewBot, simply talk to him in a Direct Message, or mention him with th
 Commands:
 
 `/credits` - Lists all the supporters
-`/tokens` - Shows how much money has been spent through text with this AI (Globally updated)
 `/image` - Uses AI to generate images
 `/information` - shows this information page
         """)
