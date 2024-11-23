@@ -147,7 +147,7 @@ Commands:
 @client.event
 async def on_message(message):
   if message.author == client.user:
-    returnpyth
+    return
   elif isinstance(message.channel, discord.DMChannel):
     async with message.channel.typing():
       gpt = chat(message.content)
