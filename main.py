@@ -104,7 +104,7 @@ async def image_command(interaction: discord.Interaction, prompt: str):
             n=1,
             size="1024x1024",
         )
-        url = response["data"][0]["url"]
+        url = requests.get(response["data"][0]["url"])
         embed = discord.Embed()
         embed.set_image(url=url)
         await interaction.followup.send(f"Your image:\n\n", embed=embed)
