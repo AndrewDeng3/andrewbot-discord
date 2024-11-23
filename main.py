@@ -158,4 +158,4 @@ async def on_message(message):
     await message.channel.send(gpt)
 
 #keep_alive()
-client.run("MTIxMDU5OTA3NzQwNzEwMDk4OQ.GNt4gA.pcamfk4TZt6kXgfDBH4bpJYdcrrwTSESSbxk1s")
+client.run(os.environ["DT"])
