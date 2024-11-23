@@ -79,7 +79,7 @@ def image(image_prompt):
 
 def chat(prompt):
   global messages, tokensUsed
-  openai.api_key = "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"
+  openai.api_key = os.environ["AI"]
   message = prompt
   messages.append(
     {"role": "user", "content": message},
@@ -95,7 +95,7 @@ def chat(prompt):
 
 @tree.command(name="image", description="Use AndrewBot's AI to generate images!")
 async def image_command(interaction, prompt: str):
-    openai.api_key = "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"
+    openai.api_key = os.environ["AI"]
     await interaction.response.defer()
     response = openai.Image.create(
       model="dall-e-3",
