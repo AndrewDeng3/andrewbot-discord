@@ -104,10 +104,20 @@ async def image_command(interaction: discord.Interaction, prompt: str):
             n=1,
             size="1024x1024",
         )
-        url = requests.get(response["data"][0]["url"])
-        embed = discord.Embed()
-        embed.set_image(url=url)
-        await interaction.followup.send(f"Your image:\n\n", embed=embed)
+        url = response["data"][0]["url"]
+
+        # Download the image locally
+        image_data = requests.get(url).content
+        image_path = "temp_image.png"
+        with open(image_path, 'wb') as handler:
+            handler.write(image_data)
+
+        # Send the downloaded image
+        await interaction.followup.send(file=discord.File(image_path))
+
+        # Optionally remove the local image file to free up space
+        os.remove(image_path)
+
     except Exception as e:
         await interaction.followup.send(f"An error occurred: {e}")
 
