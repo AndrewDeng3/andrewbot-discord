@@ -96,7 +96,10 @@ def chat(prompt):
 @tree.command(name="image", description="Use AndrewBot's AI to generate images!")
 async def image_command(interaction: discord.Interaction, prompt: str):
     try:
+        # Acknowledge the interaction early
         await interaction.response.defer()
+
+        # Generate image using OpenAI's API
         openai.api_key = os.environ["AI"]
         response = openai.Image.create(
             model="dall-e-3",
@@ -104,22 +107,19 @@ async def image_command(interaction: discord.Interaction, prompt: str):
             n=1,
             size="1024x1024",
         )
+
+        # Get the direct URL from the response
         url = response["data"][0]["url"]
+        print(f"Generated Image URL: {url}")  # Log the URL to ensure it's correct
+        embed = discord.Embed()
+        embed.set_image(url=url)
 
-        # Download the image locally
-        image_data = requests.get(url).content
-        image_path = "temp_image.png"
-        with open(image_path, 'wb') as handler:
-            handler.write(image_data)
-
-        # Send the downloaded image
-        await interaction.followup.send(file=discord.File(image_path))
-
-        # Optionally remove the local image file to free up space
-        os.remove(image_path)
-
+        # Respond to the interaction with the created embed
+        await interaction.followup.send("Your image:", embed=embed)
+        
     except Exception as e:
-        await interaction.followup.send(f"An error occurred: {e}")
+        print(f"An error occurred: {e}")
+        await interaction.followup.send("There was an error generating the image.")
 
 @tree.command(name="credits", description="Find out who/what helped me with the bot")
 async def credits_command(interaction):
