@@ -28,7 +28,6 @@ messages = [
   AndrewDeng3\'s top games are Just Any Normal Combat Game and Fly to Space 2, which are both created in python. They are text games. The goal of Just Any Normal Combat Game is to defeat enemies and gain better and unique weapons. Fly to Space 2 is about collecting biofuel to level up your rocket ship to gain higher altitudes.
   AndrewDeng3 also likes to swim. His best stroke is Freestyle.
   Whenever you generate an AI Chatbot, unless otherwise stated, it has to include the OpenAI import.
-  Use emojis more often, to make the user interaction seem more immersive.
   """},
 ]
 
@@ -78,26 +77,22 @@ def image(image_prompt):
   a = requests.get(response["data"][0]['url'])
   return a
 
-def chat(prompt, server_id):
+def chat(prompt):
   global messages, tokensUsed
   openai.api_key = os.environ["AI"]
   message = prompt
-  add_to_conversation(server_id, "user", message)  # Add to server conversation
-
+  messages.append(
+    {"role": "user", "content": message},
+  )
   chat = openai.ChatCompletion.create(
-      model="gpt-4", messages=server_conversations[server_id], temperature=0.5
+    model = "gpt-4", messages = messages, temperature = 0.5
   )
   reply = imager(chat.choices[0].message.content)
   tokensUsed += num_tokens_from_string(reply, "cl100k_base")
   tokensUsed += num_tokens_from_string(message, "cl100k_base")
-  add_to_conversation(server_id, "assistant", reply)  # Add reply to conversation
+  messages.append({"role": "assistant", "content": reply})
   return reply
-server_conversations = {}
 
-def add_to_conversation(server_id, role, content):
-    if server_id not in server_conversations:
-        server_conversations[server_id] = []
-    server_conversations[server_id].append({"role": role, "content": content})
 @tree.command(name="image", description="Use AndrewBot's AI to generate images!")
 async def image_command(interaction: discord.Interaction, prompt: str):
     try:
@@ -131,30 +126,6 @@ async def credits_command(interaction):
   global tokens
   await interaction.response.defer()
   await interaction.followup.send(f"Thanks to MilesWK, for introducing me to Discord Bots (Gizmo!) and I used some of his code. Also thanks to OpenAI, for providing the API key used for this (Still costs money though.)")
-
-@tree.command(name="poll", description="Create a poll")
-async def poll_command(interaction: discord.Interaction, question: str, options: str):
-    options_list = options.split(',')
-    emojis = [
-        '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', 
-        '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟',
-        '👍', '👎', '❤️', '😂', '😮'
-    ]  # Added more emojis
-
-    if len(options_list) > len(emojis):
-        await interaction.response.send_message("Too many options. Maximum is 15.")
-        return
-
-    embed = discord.Embed(title="Poll 🗳️", description=question)
-    for i, option in enumerate(options_list):
-        embed.add_field(name=f"{emojis[i]} {option.strip()}", value="\u200b", inline=False)
-
-    message = await interaction.channel.send(embed=embed)
-
-    for i in range(len(options_list)):
-        await message.add_reaction(emojis[i])
-
-    await interaction.response.send_message("Poll created! 🎉", ephemeral=True)
 
 @tree.command(name="information", description="Information about AndrewBot")
 async def information_command(interaction):
