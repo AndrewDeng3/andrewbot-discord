@@ -147,7 +147,7 @@ Commands:
 @client.event
 async def on_message(message):
   if message.author == client.user:
-    return
+    returnpyth
   elif isinstance(message.channel, discord.DMChannel):
     async with message.channel.typing():
       gpt = chat(message.content)
@@ -158,4 +158,4 @@ async def on_message(message):
     await message.channel.send(gpt)
 
 #keep_alive()
-client.run("MTIxMDU5OTA3NzQwNzEwMDk4OQ.GWqgit.mIJbYVUKNiu32Qw-Gnaqoa_tEhJ8pu4ptnluVU")
+client.run("MTIxMDU5OTA3NzQwNzEwMDk4OQ.Gd-H7w.uNAYGU9PE0dw0emLNgj00MqqcpEMa7FUTaClzw")quit
