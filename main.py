@@ -148,10 +148,11 @@ async def image_command(interaction: discord.Interaction, prompt: str):
 async def codehelp_command(interaction: discord.Interaction, prompt: str):
     try:
         await interaction.response.defer()
-        await interaction.followup.send(codehelp(prompt))
+        response = codehelp(prompt)
+        await interaction.followup.send(response)
     except Exception as e:
         print(f"An error occurred: {e}")
-        await interaction.followup.send("There was an error generating the image.")
+        await interaction.followup.send("There was an error generating your response.")
 
 @tree.command(name="credits", description="Find out who/what helped me with the bot")
 async def credits_command(interaction):
