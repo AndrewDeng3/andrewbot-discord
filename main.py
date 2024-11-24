@@ -7,6 +7,7 @@ import tiktoken
 import discord
 from discord import app_commands
 from termcolor import colored
+from io import BytesIO
 
 def num_tokens_from_string(string: str, encoding_name: str) -> int:
   encoding = tiktoken.get_encoding(encoding_name)
@@ -96,10 +97,7 @@ def chat(prompt):
 @tree.command(name="image", description="Use AndrewBot's AI to generate images!")
 async def image_command(interaction: discord.Interaction, prompt: str):
     try:
-        # Acknowledge the interaction early
         await interaction.response.defer()
-
-        # Generate image using OpenAI's API
         openai.api_key = os.environ["AI"]
         response = openai.Image.create(
             model="dall-e-3",
@@ -107,16 +105,11 @@ async def image_command(interaction: discord.Interaction, prompt: str):
             n=1,
             size="1024x1024",
         )
-
-        # Get the direct URL from the response
         url = response["data"][0]["url"]
-        print(f"Generated Image URL: {url}")  # Log the URL to ensure it's correct
-        embed = discord.Embed()
-        embed.set_image(url=url)
-
-        # Respond to the interaction with the created embed
-        await interaction.followup.send("Your image:", embed=embed)
-        
+        print(f"Generated Image URL: {url}")
+        image_data = requests.get(url).content
+        image_file = discord.File(BytesIO(image_data), filename="image.png")
+        await interaction.followup.send("Your image:", file=image_file)
     except Exception as e:
         print(f"An error occurred: {e}")
         await interaction.followup.send("There was an error generating the image.")
