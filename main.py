@@ -86,7 +86,24 @@ def chat(prompt):
     {"role": "user", "content": message},
   )
   chat = openai.ChatCompletion.create(
-    model = "gpt-4", messages = messages, temperature = 0.5
+    model = "gpt-4o", messages = messages, temperature = 0.5
+  )
+  reply = imager(chat.choices[0].message.content)
+  tokensUsed += num_tokens_from_string(reply, "cl100k_base")
+  tokensUsed += num_tokens_from_string(message, "cl100k_base")
+  messages.append({"role": "assistant", "content": reply})
+  return reply
+
+def codehelp(prompt):
+  global tokensUsed
+  openai.api_key = os.environ["AI"]
+  message = prompt
+  messages.append(
+    {"role": "system", "content": "You are a helpful AI Chatbot named AndrewBot that helps with python code. You are launched on Discord. You need to format code that discord can accept, which will parse the code and make it look nice."}
+    {"role": "user", "content": message},
+  )
+  chat = openai.ChatCompletion.create(
+    model = "ft:gpt-4o-2024-08-06:personal::AXEKLJiL", messages = messages, temperature = 0.5
   )
   reply = imager(chat.choices[0].message.content)
   tokensUsed += num_tokens_from_string(reply, "cl100k_base")
@@ -110,6 +127,15 @@ async def image_command(interaction: discord.Interaction, prompt: str):
         image_data = requests.get(url).content
         image_file = discord.File(BytesIO(image_data), filename="image.png")
         await interaction.followup.send("Your image:", file=image_file)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        await interaction.followup.send("There was an error generating the image.")
+
+@tree.command(name="codehelp", description="Use AndrewBot's AI to help you code!")
+async def image_command(interaction: discord.Interaction, prompt: str):
+    try:
+        await interaction.response.defer()
+        await interaction.followup.send(codehelp(prompt))
     except Exception as e:
         print(f"An error occurred: {e}")
         await interaction.followup.send("There was an error generating the image.")
