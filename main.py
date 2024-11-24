@@ -98,10 +98,10 @@ def codehelp(prompt):
   global tokensUsed
   openai.api_key = os.environ["AI"]
   message = prompt
-  messages.append(
+  messages = [
     {"role": "system", "content": "You are a helpful AI Chatbot named AndrewBot that helps with python code. You are launched on Discord. You need to format code that discord can accept, which will parse the code and make it look nice."}
     {"role": "user", "content": message},
-  )
+  ]
   chat = openai.ChatCompletion.create(
     model = "ft:gpt-4o-2024-08-06:personal::AXEKLJiL", messages = messages, temperature = 0.5
   )
