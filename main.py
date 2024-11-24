@@ -145,7 +145,7 @@ async def image_command(interaction: discord.Interaction, prompt: str):
         await interaction.followup.send("There was an error generating the image.")
 
 @tree.command(name="codehelp", description="Use AndrewBot's AI to help you code!")
-async def codehelp(interaction: discord.Interaction, prompt: str):
+async def codehelp_command(interaction: discord.Interaction, prompt: str):
     try:
         await interaction.response.defer()
         await interaction.followup.send(codehelp(prompt))
