@@ -99,7 +99,7 @@ def codehelp(prompt):
   openai.api_key = os.environ["AI"]
   message = prompt
   messages = [
-    {"role": "system", "content": "You are a helpful AI Chatbot named AndrewBot that helps with python code. You are launched on Discord. You need to format code that discord can accept, which will parse the code and make it look nice."}
+    {"role": "system", "content": "You are a helpful AI Chatbot named AndrewBot that helps with python code. You are launched on Discord. You need to format code that discord can accept, which will parse the code and make it look nice."},
     {"role": "user", "content": message},
   ]
   chat = openai.ChatCompletion.create(
