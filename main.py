@@ -128,6 +128,7 @@ def codehelp(prompt):
 async def image_command(interaction: discord.Interaction, prompt: str):
     try:
         await interaction.response.defer()
+        print(f"Recieved interaction \"/codehelp\" with interaction {prompt}")
         openai.api_key = os.environ["AI"]
         response = openai.Image.create(
             model="dall-e-3",
@@ -138,6 +139,7 @@ async def image_command(interaction: discord.Interaction, prompt: str):
         url = response["data"][0]["url"]
         image_data = requests.get(url).content
         image_file = discord.File(BytesIO(image_data), filename="image.png")
+        print(f"Generated response for \"/codehelp\" with interaction {prompt}: {url}")
         await interaction.followup.send("Your image:", file=image_file)
     except Exception as e:
         await interaction.followup.send("There was an error generating the image.")
@@ -145,8 +147,10 @@ async def image_command(interaction: discord.Interaction, prompt: str):
 @tree.command(name="codehelp", description="Use AndrewBot's AI to help you code!")
 async def codehelp_command(interaction: discord.Interaction, prompt: str):
     try:
+        print(f"Recieved interaction \"/codehelp\" with interaction {prompt}")
         await interaction.response.defer()
         response = codehelp(prompt)
+        print(f"Generated response for \"/codehelp\" with interaction {prompt}: {response}")
         await interaction.followup.send(response)
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -155,11 +159,13 @@ async def codehelp_command(interaction: discord.Interaction, prompt: str):
 @tree.command(name="credits", description="Find out who/what helped me with the bot")
 async def credits_command(interaction):
   global tokens
+  print("Recieved interaction \"/credits\"")
   await interaction.response.defer()
   await interaction.followup.send(f"Thanks to MilesWK, for introducing me to Discord Bots (Gizmo!) and I used some of his code. Also thanks to OpenAI, for providing the API key used for this (Still costs money though.)")
 
 @tree.command(name="information", description="Information about AndrewBot")
 async def information_command(interaction):
+        print("Recieved interaction \"/information\"")
         guild_count = len(client.guilds)
         await interaction.response.defer()
         await interaction.followup.send(f"""
@@ -184,15 +190,18 @@ Commands:
 
 @client.event
 async def on_message(message):
+  print(f"Recieved normal interaction: {message}")
   if message.author == client.user:
     return
   elif isinstance(message.channel, discord.DMChannel):
     async with message.channel.typing():
       gpt = chat(message.content)
+    print(f"Generated response for normal interaction with interaction {message.content}: {gpt}")
     await message.channel.send(gpt)
   elif isinstance(message.channel, discord.TextChannel) and client.user in message.mentions:
     async with message.channel.typing():
       gpt = chat(message.content)
+    print(f"Generated response for normal interaction with interaction {message.content}: {gpt}")
     await message.channel.send(gpt)
 
 #keep_alive()
