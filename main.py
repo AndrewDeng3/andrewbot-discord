@@ -136,12 +136,10 @@ async def image_command(interaction: discord.Interaction, prompt: str):
             size="1024x1024",
         )
         url = response["data"][0]["url"]
-        print(f"Generated Image URL: {url}")
         image_data = requests.get(url).content
         image_file = discord.File(BytesIO(image_data), filename="image.png")
         await interaction.followup.send("Your image:", file=image_file)
     except Exception as e:
-        print(f"An error occurred: {e}")
         await interaction.followup.send("There was an error generating the image.")
 
 @tree.command(name="codehelp", description="Use AndrewBot's AI to help you code!")
