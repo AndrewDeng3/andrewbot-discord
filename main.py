@@ -31,6 +31,7 @@ messages = [
   /information can help the user know more about you.
   Do not use LaTeX, it is not supported on discord, but code blocks do work.
   Your discord invite link: https://discord.com/oauth2/authorize?client_id=1210599077407100989
+  You can generate at most 2000 characters
   """},
 ]
 
@@ -80,34 +81,55 @@ def image(image_prompt):
   a = requests.get(response["data"][0]['url'])
   return a
 
+import tempfile
+
 def chat(prompt):
-  global messages, tokensUsed
-  openai.api_key = os.environ["AI"]
-  message = prompt
-  messages.append(
-    {"role": "user", "content": message},
-  )
-  chat = openai.ChatCompletion.create(
-    model = "gpt-4o", messages = messages, temperature = 0.5, max_completion_tokens = 500
-  )
-  reply = imager(chat.choices[0].message.content)
-  tokensUsed += num_tokens_from_string(reply, "cl100k_base")
-  tokensUsed += num_tokens_from_string(message, "cl100k_base")
-  messages.append({"role": "assistant", "content": reply})
-  return reply
+    global messages, tokensUsed
+    openai.api_key = os.environ["AI"]
+    message = prompt
+    messages.append(
+        {"role": "user", "content": message},
+    )
+    chat = openai.ChatCompletion.create(
+        model = "gpt-4o", messages = messages, temperature = 0.5, max_completion_tokens = 500
+    )
+    reply = imager(chat.choices[0].message.content)
+
+    if len(reply) > 2000:
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as temp_file:
+            temp_file.write(reply.encode())
+            temp_file_path = temp_file.name
+        return discord.File(temp_file_path)  # Return the file object
+
+    messages.append({"role": "assistant", "content": reply})
+    return reply
 
 def codehelp(prompt):
   global tokensUsed, messages
+  go = False
   openai.api_key = os.environ["AI"]
   message = prompt
   messages[0] = {"role": "system", "content": "You are a helpful AI Chatbot named AndrewBot that helps with python code. You are launched on Discord. You need to format code that discord can accept, which will parse the code and make it look nice."}
-  messages.append({"role": "user", "content": message})
-  chat = openai.ChatCompletion.create(
-    model = "ft:gpt-4o-2024-08-06:personal::AXEKLJiL", messages = messages, temperature = 0.5, max_completion_tokens = 500
-  )
-  reply = imager(chat.choices[0].message.content)
-  tokensUsed += num_tokens_from_string(reply, "cl100k_base")
-  tokensUsed += num_tokens_from_string(message, "cl100k_base")
+
+  while go == False:
+      messages.append({"role": "user", "content": message})
+      chat = openai.ChatCompletion.create(
+          model = "ft:gpt-4o-2024-08-06:personal::AXEKLJiL", messages = messages, temperature = 0.5, max_completion_tokens = 500
+      )
+      reply = imager(chat.choices[0].message.content)
+      if len(reply) <= 2000:
+          go = True
+      else:
+          messages.pop(len(messages) - 1)
+
+  if len(reply) > 2000:
+      # Create a temporary file
+      with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as temp_file:
+          temp_file.write(reply.encode())
+          temp_file_path = temp_file.name
+      return discord.File(temp_file_path)  # Return the file object
+
   messages.append({"role": "assistant", "content": reply})
   messages[0] = {"role": "system", "content": """You are a helpful chatbot named AndrewBot, you are currently a bot on Discord.
   You are to use varied responses, with 8th-grade level English.
@@ -125,8 +147,11 @@ def codehelp(prompt):
   /information can help the user know more about you.
   Do not use LaTeX, it is not supported on discord, but code blocks do work.
   Your discord invite link: https://discord.com/oauth2/authorize?client_id=1210599077407100989
+  You can at most generate 2000 characters
   """}
+
   return reply
+
 
 @tree.command(name="image", description="Use AndrewBot's AI to generate images!")
 async def image_command(interaction: discord.Interaction, prompt: str):
@@ -194,31 +219,25 @@ Commands:
 
 @client.event
 async def on_message(message):
-  print(f"Recieved normal interaction: {message}")
-  if message.author == client.user:
-    return
-  elif isinstance(message.channel, discord.DMChannel):
-    async with message.channel.typing():
-      go = False
-      while go == False:
-        gpt = chat(message.content)
-        if len([*gpt]) > 2000:
-          go = False
+    print(f"Received normal interaction: {message}")
+    if message.author == client.user:
+        return
+    elif isinstance(message.channel, discord.DMChannel):
+        async with message.channel.typing():
+            gpt = chat(message.content)
+        print(f"Generated response for normal interaction with interaction {message.content}: {gpt}")
+        if isinstance(gpt, discord.File):  # Check if the response is a discord.File
+            await message.channel.send("The response was too long, here is a text file with the details:", file=gpt)
         else:
-          go = True
-    print(f"Generated response for normal interaction with interaction {message.content}: {gpt}")
-    await message.channel.send(gpt)
-  elif isinstance(message.channel, discord.TextChannel) and client.user in message.mentions:
-    async with message.channel.typing():
-      go = False
-      while go == False:
-        gpt = chat(message.content)
-        if len([*gpt]) > 2000:
-          go = False
+            await message.channel.send(gpt)
+    elif isinstance(message.channel, discord.TextChannel) and client.user in message.mentions:
+        async with message.channel.typing():
+            gpt = chat(message.content)
+        print(f"Generated response for normal interaction with interaction {message.content}: {gpt}")
+        if isinstance(gpt, discord.File):  # Check if the response is a discord.File
+            await message.channel.send("The response was too long, here is a text file with the details:", file=gpt)
         else:
-          go = True
-    print(f"Generated response for normal interaction with interaction {message.content}: {gpt}")
-    await message.channel.send(gpt)
+            await message.channel.send(gpt)
 
 #keep_alive()
 client.run(os.environ["DT"])
