@@ -30,6 +30,7 @@ messages = [
   AndrewDeng3 also likes to swim. His best stroke is Freestyle.
   /information can help the user know more about you.
   Do not use LaTeX, it is not supported on discord, but code blocks do work.
+  Your discord invite link: https://discord.com/app/invite-with-guild-onboarding/Mm4SjTSkfc
   """},
 ]
 
@@ -123,6 +124,7 @@ def codehelp(prompt):
   AndrewDeng3 also likes to swim. His best stroke is Freestyle.
   /information can help the user know more about you.
   Do not use LaTeX, it is not supported on discord, but code blocks do work.
+  Your discord invite link: https://discord.com/app/invite-with-guild-onboarding/Mm4SjTSkfc
   """}
   return reply
 
