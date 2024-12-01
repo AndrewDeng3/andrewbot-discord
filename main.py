@@ -88,7 +88,7 @@ def chat(prompt):
     {"role": "user", "content": message},
   )
   chat = openai.ChatCompletion.create(
-    model = "gpt-4o", messages = messages, temperature = 0.5
+    model = "gpt-4o", messages = messages, temperature = 0.5, max_completion_tokens = 500
   )
   reply = imager(chat.choices[0].message.content)
   tokensUsed += num_tokens_from_string(reply, "cl100k_base")
@@ -103,7 +103,7 @@ def codehelp(prompt):
   messages[0] = {"role": "system", "content": "You are a helpful AI Chatbot named AndrewBot that helps with python code. You are launched on Discord. You need to format code that discord can accept, which will parse the code and make it look nice."}
   messages.append({"role": "user", "content": message})
   chat = openai.ChatCompletion.create(
-    model = "ft:gpt-4o-2024-08-06:personal::AXEKLJiL", messages = messages, temperature = 0.5
+    model = "ft:gpt-4o-2024-08-06:personal::AXEKLJiL", messages = messages, temperature = 0.5, max_completion_tokens = 500
   )
   reply = imager(chat.choices[0].message.content)
   tokensUsed += num_tokens_from_string(reply, "cl100k_base")
@@ -199,12 +199,24 @@ async def on_message(message):
     return
   elif isinstance(message.channel, discord.DMChannel):
     async with message.channel.typing():
-      gpt = chat(message.content)
+      go = False
+      while go == False:
+        gpt = chat(message.content)
+        if len([*gpt]) > 2000:
+          go = False
+        else:
+          go = True
     print(f"Generated response for normal interaction with interaction {message.content}: {gpt}")
     await message.channel.send(gpt)
   elif isinstance(message.channel, discord.TextChannel) and client.user in message.mentions:
     async with message.channel.typing():
-      gpt = chat(message.content)
+      go = False
+      while go == False:
+        gpt = chat(message.content)
+        if len([*gpt]) > 2000:
+          go = False
+        else:
+          go = True
     print(f"Generated response for normal interaction with interaction {message.content}: {gpt}")
     await message.channel.send(gpt)
 
