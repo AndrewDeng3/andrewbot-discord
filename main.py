@@ -86,4 +86,4 @@ async def on_message(message):
         else:
             await message.channel.send(gpt)
 
-client.run(os.environ["DT"])
+client.run(os.environ["D"])
