@@ -54,6 +54,24 @@ def chat(prompt):
     messages.append({"role": "assistant", "content": reply})
     return reply
 
+@tree.command(name="image", description="Use FestiveBot's AI to generate images! It will generate a festive version what you want!")
+async def image_command(interaction: discord.Interaction, object: str):
+    try:
+        await interaction.response.defer()
+        openai.api_key = os.environ["AI"]
+        response = openai.Image.create(
+            model="dall-e-3",
+            prompt="Make a festive version of: " + object,
+            n=1,
+            size="1024x1024",
+        )
+        url = response["data"][0]["url"]
+        image_data = requests.get(url).content
+        image_file = discord.File(BytesIO(image_data), filename="image.png")
+        await interaction.followup.send("Your image:", file=image_file)
+    except Exception as e:
+        await interaction.followup.send("There was an error generating the image.")
+
 @tree.command(name="song", description="Write a random festive song!")
 async def song_command(interaction):
   global tokens
@@ -86,4 +104,4 @@ async def on_message(message):
         else:
             await message.channel.send(gpt)
 
-client.run(os.environ["D"])
+client.run(os.environ["DT"])
