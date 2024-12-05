@@ -5,23 +5,20 @@ import openai
 import requests
 import tiktoken
 import discord
-import time
 from discord import app_commands
 from termcolor import colored
 from io import BytesIO
-from collections import defaultdict
-import tempfile
 
 def num_tokens_from_string(string: str, encoding_name: str) -> int:
-    encoding = tiktoken.get_encoding(encoding_name)
-    num_tokens = len(encoding.encode(string))
-    return num_tokens
+  encoding = tiktoken.get_encoding(encoding_name)
+  num_tokens = len(encoding.encode(string))
+  return num_tokens
 
 messages = [
-    {"role": "system", "content": """You are a festive AI discord bot that ONLY answers questions about winter holidays and festivities, as well as generate songs. Otherwise, you will politely guide the conversation back to winter festivities.
-    Your discord invite link: https://discord.com/oauth2/authorize?client_id=1313504973450907700
-    You can generate at most 2000 characters
-    """},
+  {"role": "system", "content": """You are a festive AI discord bot that ONLY answers questions about winter holidays and festivities, as well as generate songs. Otherwise, you will politely guide the conversation back to winter festivities.
+  Your discord invite link: https://discord.com/oauth2/authorize?client_id=1313504973450907700
+  You can generate at most 2000 characters
+  """},
 ]
 
 tokensUsed = 0
@@ -30,15 +27,13 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
-RATE_LIMIT = 5
-RATE_TIME_WINDOW = 60 * 60
-user_request_times = defaultdict(list)
-
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="The winter is the best!"))
-    await tree.sync()
-    print(f'We have logged in as {client.user}')
+  await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name="The winter is the best!"))
+  await tree.sync()
+  print(f'We have logged in as {client.user}')
+
+import tempfile
 
 def chat(prompt):
     global messages, tokensUsed
@@ -48,7 +43,7 @@ def chat(prompt):
         {"role": "user", "content": message},
     )
     chat = openai.ChatCompletion.create(
-        model="gpt-4o", messages=messages, temperature=0.5, max_completion_tokens=500
+        model = "gpt-4o", messages = messages, temperature = 0.5, max_completion_tokens = 500
     )
     reply = chat.choices[0].message.content
     if len(reply) > 2000:
@@ -61,17 +56,6 @@ def chat(prompt):
 
 @tree.command(name="image", description="Use FestiveBot's AI to generate images! It will generate a festive version what you want!")
 async def image_command(interaction: discord.Interaction, object: str):
-    user_id = interaction.user.id
-    current_time = time.time()
-    request_times = user_request_times[user_id]
-    request_times = [timestamp for timestamp in request_times if current_time - timestamp < RATE_TIME_WINDOW]
-    user_request_times[user_id] = request_times
-
-    if len(request_times) >= RATE_LIMIT:
-        await interaction.response.send_message("You have reached the rate limit. Please wait before requesting another image.", ephemeral=True)
-        return
-    request_times.append(current_time)
-
     try:
         await interaction.response.defer()
         openai.api_key = os.environ["AI"]
@@ -90,13 +74,13 @@ async def image_command(interaction: discord.Interaction, object: str):
 
 @tree.command(name="song", description="Write a random festive song!")
 async def song_command(interaction):
-    global tokens
-    print("Received interaction \"/song\"")
-    await interaction.response.defer()
-    gpt = chat("Write a festive holiday song about winter joy.")
-    if isinstance(gpt, discord.File):
-        await interaction.followup.send(gpt)
+  global tokens
+  print("Recieved interaction \"/song\"")
+  await interaction.response.defer()
+  gpt = chat("Write a festive holiday song about winter joy.")
+  if isinstance(gpt, discord.File):
     await interaction.followup.send(gpt)
+  await interaction.followup.send(gpt)
 
 @client.event
 async def on_message(message):
