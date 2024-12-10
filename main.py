@@ -44,7 +44,7 @@ def chat(prompt):
         {"role": "user", "content": message},
     )
     chat = openai.ChatCompletion.create(
-        model = "gpt-4o", messages = messages, temperature = 0.5, max_completion_tokens = 500
+        model = "ftjob-d30wKS01Q6zG1pXVDq5JQpJl", messages = messages, temperature = 0.5, max_completion_tokens = 500
     )
     reply = chat.choices[0].message.content
     if len(reply) > 2000:
